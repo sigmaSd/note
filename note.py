@@ -4,11 +4,13 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GLib
-from threading import Thread
-import socket
 import sys
-PORT = 12347                   
+import socket
+from threading import Thread
+
+PORT = 12347
 HOST = "127.0.0.1"
+
 
 def start_server(w):
     def show_all(w):
@@ -28,6 +30,7 @@ def start_server(w):
                 continue
     except KeyboardInterrupt:
         conn.close()
+
 
 def check_already_running() -> bool:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,9 +53,8 @@ def main():
     if check_already_running():
         return
     else:
-        server = Thread(target=start_server, args= (w,))
+        server = Thread(target=start_server, args=(w,))
         server.start()
-
 
     def hide(win, ev):
         keyname = Gdk.keyval_name(ev.keyval)
@@ -63,6 +65,6 @@ def main():
     w.show_all()
     Gtk.main()
 
+
 if __name__ == "__main__":
     main()
-
