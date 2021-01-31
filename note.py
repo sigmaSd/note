@@ -10,25 +10,21 @@ import sys
 PORT = 12347                   
 HOST = "127.0.0.1"
 
-def show_all(w):
-    w.show_all()
-
 def start_server(w):
+    def show_all(w):
+        w.show_all()
+
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((HOST, PORT))
-
     s.listen()
+
     try:
         while True:
             try:
                 conn, addr = s.accept()
                 data = conn.recv(1024)
                 GLib.idle_add(show_all, w)
-
-
-
             except socket.error:
-                print("err")
                 continue
     except KeyboardInterrupt:
         conn.close()
@@ -41,32 +37,32 @@ def check_already_running() -> bool:
     except Exception as e:
         return False
 
-def hide(win, ev):
-    keyname = Gdk.keyval_name(ev.keyval)
-    if keyname == "Escape":
-        win.hide()
-
-def quit(w):
-    Gtk.main_quit()
 
 def main():
+    def quit(w):
+        Gtk.main_quit()
+
     t = Gtk.TextView()
     w = Gtk.Window()
-    #w.set_decorated(False)
+    w.add(t)
     w.connect("destroy", quit)
+
     if check_already_running():
-        print("ret")
         return
     else:
         server = Thread(target=start_server, args= (w,))
         server.start()
 
-    w.add(t)
+
+    def hide(win, ev):
+        keyname = Gdk.keyval_name(ev.keyval)
+        if keyname == "Escape":
+            win.hide()
+
     w.connect("key-press-event", hide)
     w.show_all()
     Gtk.main()
 
 if __name__ == "__main__":
-    # execute only if run as a script
     main()
 
