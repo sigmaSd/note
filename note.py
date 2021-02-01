@@ -42,27 +42,48 @@ def check_already_running() -> bool:
 
 
 def main():
-    def quit(w):
-        Gtk.main_quit()
+    def gui() -> Gtk.Window:
+        def quit(_w):
+            Gtk.main_quit()
+        def hide(win, ev):
+            keyname = Gdk.keyval_name(ev.keyval)
+            if keyname == "Escape":
+                win.hide()
+        t = Gtk.TextView()
+        w = Gtk.Window()
+        w.maximize()
+        w.add(t)
+        w.connect("destroy", quit)
+        w.connect("key-press-event", hide)
+        w.show_all()
+        return w
+    
+    def style():
+        css = b'''
+        textview text {
+            background-color: #eafba1;
+        }
+        textview {
+            font-size: 28px;
+        }
+        '''
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_data(css)
+        context = Gtk.StyleContext()
+        screen = Gdk.Screen.get_default()
+        context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-    t = Gtk.TextView()
-    w = Gtk.Window()
-    w.add(t)
-    w.connect("destroy", quit)
+    def start_server_or_exit(window) -> bool:
+        if check_already_running():
+            sys.exit()
+        else:
+            server = Thread(target=start_server, args=(window,))
+            server.start()
 
-    if check_already_running():
-        return
-    else:
-        server = Thread(target=start_server, args=(w,))
-        server.start()
 
-    def hide(win, ev):
-        keyname = Gdk.keyval_name(ev.keyval)
-        if keyname == "Escape":
-            win.hide()
-
-    w.connect("key-press-event", hide)
-    w.show_all()
+    window = gui()
+    start_server_or_exit(window)
+    style()
     Gtk.main()
 
 
