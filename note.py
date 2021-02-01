@@ -1,12 +1,12 @@
 #!/bin/python
+from threading import Thread
+import socket
+import sys
 import gi
 gi.require_version("Gtk", "3.0")
+from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Gdk
-from gi.repository import GLib
-import sys
-import socket
-from threading import Thread
 
 PORT = 12347
 HOST = "127.0.0.1"
@@ -45,6 +45,7 @@ def main():
     def gui() -> Gtk.Window:
         def quit(_w):
             Gtk.main_quit()
+
         def hide(win, ev):
             keyname = Gdk.keyval_name(ev.keyval)
             if keyname == "Escape":
@@ -57,7 +58,7 @@ def main():
         w.connect("key-press-event", hide)
         w.show_all()
         return w
-    
+
     def style():
         css = b'''
         textview text {
@@ -71,7 +72,8 @@ def main():
         css_provider.load_from_data(css)
         context = Gtk.StyleContext()
         screen = Gdk.Screen.get_default()
-        context.add_provider_for_screen(screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        context.add_provider_for_screen(
+            screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def start_server_or_exit(window) -> bool:
         if check_already_running():
@@ -79,7 +81,6 @@ def main():
         else:
             server = Thread(target=start_server, args=(window,))
             server.start()
-
 
     window = gui()
     start_server_or_exit(window)
